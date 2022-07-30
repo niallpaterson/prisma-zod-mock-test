@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Puppet {
+  id           Int @id @default(autoincrement())
+  name         String
+  description  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+  masterId     Int
+  master      PuppetMaster @relation(fields: [masterId], references: [id])
+  strings     PuppetStrings @relation(fields: [stringId], references: [id])
+  stringId    Int
+}
+
+model PuppetMaster {
+  id          Int @id @default(autoincrement())
+  name        String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  puppets     Puppet[]
+}
+
+model PuppetStrings {
+  id          Int @id @default(autoincrement())
+  count Int
+  material String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  puppets Puppet[]
+}
+
+
+
+
+// -------------------------------------------------- 
+// *** ZOD *******************************************
+// -------------------------------------------------- 
+
+
+generator zod {
+  provider                 = "zod-prisma"
+  output                   = "./zod" // (default) the directory where generated zod schemas will be saved
+
+  // relationModel            = true //  (default) Create and export both plain and related models.
+  relationModel         =  "default" // Do not export model without relations.
+  // relationModel         = false // Do not generate related model
+
+  modelCase                = "PascalCase" // (default) Output models using pascal case (ex. UserModel, PostModel)
+  // modelCase             = "camelCase" // Output models using camel case (ex. userModel, postModel)
+
+  modelSuffix              = "Model" // (default) Suffix to apply to your prisma models when naming Zod schemas
+
+  // useDecimalJs          = false // (default) represent the prisma Decimal type using as a JS number
+  useDecimalJs             = true // represent the prisma Decimal type using Decimal.js (as Prisma does)
+
+  imports                  = "types"
+
+  // https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-by-null-values
+  prismaJsonNullability    = true // (default) uses prisma's scheme for JSON field nullability
+  // prismaJsonNullability = false // allows null assignment to optional JSON fields
+}
